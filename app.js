@@ -11,7 +11,7 @@ var renderFile = function (data, filename) {
 };
 
 var parseMarkdown = function (filename) {
-  fs.readFile(sourceDirectory + '/' + filename, { encoding: 'utf-8' }, function (err, data) {
+  fs.readFile(sourceDirectory + '/' + filename, { encoding: 'utf8' }, function (err, data) {
     if (err) { throw err; }
     var outputFile = filename.replace(/\.md/, '.html');
     renderFile(data, outputFile);
