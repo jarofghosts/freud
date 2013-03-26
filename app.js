@@ -4,7 +4,7 @@ var fs = require('fs'),
   targetDirectory = '/home/jarofghosts/flog';
 
 var renderFile = function (data, filename) {
-  fs.writeFile(filename, md(data), function (err) {
+  fs.writeFile(targetDirectory + '/' + filename, md(data), function (err) {
     if (err) { throw err; }
     console.log(filename + ' rendered.');
   });
