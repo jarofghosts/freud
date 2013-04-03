@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "author": "jesse keane <me@jessekeane.me>",
   "dependencies": {
-    "node-markdown": "*"
+    "node-markdown": "*",
+    "gift": "*"
   }
 }
