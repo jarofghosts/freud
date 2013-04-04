@@ -3,7 +3,10 @@ var fs = require('fs'),
   parsingStack = [];
 
 fs.watch(freud.sourceDirectory, { persistent: true }, function (event, filename) {
-  if ((freud.ignoreDot && !filename.match(/^\./)) && parsingStack.indexOf(filename) === -1) {
+  if (!filename.match(/^\./) && !filename.match(/~$/) && parsingStack.indexOf(filename) === -1) {
+    freud.updateList(function () {
+      console.log('updated listing');
+    });
     parsingStack.push(filename);
     fs.exists(freud.sourceDirectory + filename, function (inputFileExists) {
       if (inputFileExists) {
@@ -18,6 +21,10 @@ fs.watch(freud.sourceDirectory, { persistent: true }, function (event, filename)
             freud.renderFile(outputFile, data, function () {
               parsingStack.splice(parsingStack.indexOf(filename), 1);
             });
+          });
+        } else if (freud.moveRest) {
+          freud.link(filename, function (outputFile) {
+            parsingStack.splice(parsingStack.indexOf(filename), 1);
           });
         }
 

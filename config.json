@@ -1,6 +1,6 @@
 {
-  "source": "/home/jarofghosts",
+  "source": "/home/jarofghosts/flog-src",
   "target": "/home/jarofghosts/flog",
   "destructive": true,
-  "ignoreDot": true
+  "moveRest": true
 }
