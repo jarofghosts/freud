@@ -1,5 +1,6 @@
 {
   "source": "/home/jarofghosts",
   "target": "/home/jarofghosts/flog",
-  "destructive": true
+  "destructive": true,
+  "ignoreDot": true
 }

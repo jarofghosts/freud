@@ -4,6 +4,6 @@
   "author": "jesse keane <me@jessekeane.me>",
   "dependencies": {
     "node-markdown": "*",
-    "gift": "*"
+    "jade": "*"
   }
 }
