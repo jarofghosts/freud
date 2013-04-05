@@ -10,4 +10,4 @@ Supported extensions:
 Further configuration options:
 * `destructive` automatically unlink any rendered file if the precompiled counterpart is removed.
 * `moveRest` link files that do not match compile-ready extensions into target directory. In the case of collisions, the freud-rendered file will be favored.
-Note: this creates a *link* rather than a *copy*
+Note: this creates a *symlink* rather than a *copy*
