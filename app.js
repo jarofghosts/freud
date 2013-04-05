@@ -4,8 +4,8 @@ var fs = require('fs'),
 
 fs.watch(freud.sourceDirectory, { persistent: true }, function (event, filename) {
   if (!filename.match(/^\./) && !filename.match(/~$/) && parsingStack.indexOf(filename) === -1) {
-    freud.updateList(function () {
-      console.log('updated listing');
+    freud.updateList(function (posts) {
+      console.dir(posts);
     });
     parsingStack.push(filename);
     fs.exists(freud.sourceDirectory + filename, function (inputFileExists) {

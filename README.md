@@ -4,7 +4,7 @@ FREUD.js
 Listens to `source` for files with relevant extensions and renders them to `target`.
 
 Supported extensions:
-* `.md` parsed as [Markdown](http://daringfireball.net/projects/markdown/syntax) using [node-markdown](https://github.com/andris9/node-markdown) into HTML.
+* `.md` parsed as [Markdown](http://daringfireball.net/projects/markdown/syntax) using [node-markdown](https://github.com/andris9/node-markdown) into HTML. Markdown files are considered blog entries or 'posts' for the sake of generation.
 * `.jade` parsed as [jade](http://jade-lang.com/) using the [official jade node.js module](https://github.com/visionmedia/jade) into HTML. Jade files are rendered with a `freud` object that contains an array of posts as well as the version string. Each post in the array is formatted as follows:
     {
       "title": "The Blog Entry Title",
