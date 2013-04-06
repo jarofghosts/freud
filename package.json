@@ -1,14 +1,9 @@
 {
   "name": "freud",
-  "version": "0.1.1",
+  "version": "0.0.1",
   "author": "jesse keane <me@jessekeane.me> (http://jessekeane.me)",
   "repository": {
     "type": "git",
     "url": "https://github.com/jarofghosts/freud.git"
   }
-  "dependencies": {
-    "node-markdown": "*",
-    "jade": "*"
-  },
-  "private": true
 }
