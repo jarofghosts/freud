@@ -1,5 +1,6 @@
 {
   "name": "freud",
+  "description": "process files by extension",
   "version": "0.0.1",
   "author": "jesse keane <me@jessekeane.me> (http://jessekeane.me)",
   "repository": {
