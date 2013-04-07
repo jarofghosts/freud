@@ -16,7 +16,6 @@ freud.listen('md', function (file) {
   return file;
 });
 
-
 freud.go();
 ```
 
@@ -27,6 +26,16 @@ The file object available within your listen statements is of structure:
 {
   "name": "example.txt",
   "stats": (node fs.Stats object),
-  "data": "the file contents"
+  "data": "the file contents",
+  "write": true
 }
 ```
+
+If the `file.write` property is set to false, Freud will not write it to the target directory.
+
+Freud will also emit certain events that may be useful, such as:
+* `started` when the service begins watching.
+* `extensionAdded` whenever a new extension is being listened for.
+* `processing` whenever a valid (does not begin with '.' or end with '~' and is not currently in the processing queue) file change event is caught.
+* `processed` after a file has been processed and written to the target directory.
+* `unlinked` when a file has been unlinked due to removal of the file in the source directory.
