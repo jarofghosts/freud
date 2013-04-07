@@ -14,8 +14,19 @@ freud.listen('md', function(file) {
   file.data = md(file.data);
   file.name = file.name.replace(/\.md$/, '.html');
   return file;
-}
+});
 
 
 freud.go();
+```
+
+That will watch `/home/me` for files with the `.md` extension and intercept the copy to rename the file with a `.html` extension.
+
+The file object available within your listen statements is of structure:
+```js
+{
+  "name": "example.txt",
+  "stats": (node fs.Stats object),
+  "data": "the file contents"
+}
 ```
