@@ -7,5 +7,6 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/jarofghosts/freud.git"
-  }
+  },
+  "license": "BSD"
 }
