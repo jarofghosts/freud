@@ -10,7 +10,7 @@ Err that's confusing, here's an example:
 var Freud = require('freud').Freud,
   freud = new Freud('/home/me', '/home/me/html');
 
-freud.listen('md', function(file) {
+freud.listen('md', function (file) {
   file.data = md(file.data);
   file.name = file.name.replace(/\.md$/, '.html');
   return file;
