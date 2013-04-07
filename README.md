@@ -19,7 +19,7 @@ freud.listen('md', function (file) {
 freud.go();
 ```
 
-That will watch `/home/me` for files with the `.md` extension and intercept the copy to rename the file with a `.html` extension.
+That will watch `/home/me` for files with the `.md` extension and intercept the copy to rename the file with a `.html` extension. Listen also accepts '*' to apply to all processing. *Note: Functions added with '*' will be applied before all others.*
 
 The file object available within your listen statements is of structure:
 ```js

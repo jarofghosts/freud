@@ -1,7 +1,7 @@
 {
   "name": "freud",
   "description": "copy and process files by extension",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "author": "jesse keane <me@jessekeane.me> (http://jessekeane.me)",
   "main": "index",
   "repository": {
