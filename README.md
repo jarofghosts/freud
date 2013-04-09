@@ -42,7 +42,8 @@ Freud also accepts an optional third parameter of an options object. The options
 Freud will also emit certain events that may be useful, such as:
 * `started` when the service begins watching.
 * `extensionAdded` whenever a new extension is being listened for.
-* `processing` whenever a valid (does not begin with '.' or end with '~' and is not currently in the processing queue) file change event is caught.
-* `processed` after a file has been processed and written to the target directory.
+* `compiling` whenever a valid (does not begin with '.' or end with '~' and is not currently in the processing queue) file change event is caught.
+* `compiled` after a file has been processed and written to the target directory.
+* `recompiled` after a successful compilation triggered by `freud.recompile(filename)`.
 * `blocked` whenever a write to the target has been canceled due to `file.write` being set to `false`.
 * `unlinked` when a file has been unlinked due to removal of the file in the source directory.
