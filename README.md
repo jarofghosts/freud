@@ -19,8 +19,7 @@ freud.listen('md', function (file) {
 freud.go();
 ```
 
-That will watch `/home/me` for files with the `.md` extension and intercept the copy to rename the file with a `.html` extension. Listen also accepts '\*' to apply to all processing.
-*Note: Functions added with the wildcard will be applied before all others.*
+That will watch `/home/me` for files with the `.md` extension and intercept the copy to rename the file with a `.html` extension. Listen also accepts '\*:before' and '\*:after' to apply to all processing. You can probably guess when they occur. If you add a listener with '\*', it will be pushed onto the \*:before stack.
 
 The file object available within your listen statements is of structure:
 ```js
@@ -32,7 +31,13 @@ The file object available within your listen statements is of structure:
 }
 ```
 
-If the `file.write` property is set to `false`, Freud will **not** write it to the target directory.
+If the `file.write` property is set to `false` and never reset to `true` at any point in the chain of transformations, Freud will **not** write it to the target directory.
+
+----
+
+Freud also accepts an optional third parameter of an options object. The options available are as follows:
+* `monitorDot` to watch for dotfile changes, default is `false`
+* `monitorSquiggle` to watch for files with names ending with ~, such as are common for backups.
 
 Freud will also emit certain events that may be useful, such as:
 * `started` when the service begins watching.
