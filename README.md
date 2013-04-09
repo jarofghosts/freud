@@ -4,7 +4,9 @@ FREUD.js
 
 Freud watches directories and copies files between them. It allows you to mutate the file information before rendering used callbacks attached to routes that look up the file extension.
 
-Err that's confusing, here's an example:
+Err that's confusing, here:
+
+### example ###
 
 ```js
 var Freud = require('freud').Freud,
@@ -35,6 +37,8 @@ If the `file.write` property is set to `false` and never reset to `true` at any 
 
 ----
 
+### extra info ###
+
 Freud also accepts an optional third parameter of an options object. The options available are as follows:
 * `monitorDot` to watch for dotfile changes, default is `false`
 * `monitorSquiggle` to watch for files with names ending with ~, such as are common for backups.
@@ -47,3 +51,7 @@ Freud will also emit certain events that may be useful, such as:
 * `recompiled` after a successful compilation triggered by `freud.recompile(filename)`.
 * `blocked` whenever a write to the target has been canceled due to `file.write` being set to `false`.
 * `unlinked` when a file has been unlinked due to removal of the file in the source directory.
+
+### license ###
+
+BSD
