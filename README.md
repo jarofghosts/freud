@@ -37,11 +37,13 @@ If the `file.write` property is set to `false` and never reset to `true` at any 
 
 ----
 
-### extra info ###
+### options ###
 
 Freud also accepts an optional third parameter of an options object. The options available are as follows:
 * `monitorDot` to watch for dotfile changes, default is `false`
 * `monitorSquiggle` to watch for files with names ending with ~, such as are common for backups.
+
+### events ###
 
 Freud will also emit certain events that may be useful, such as:
 * `started` when the service begins watching.
