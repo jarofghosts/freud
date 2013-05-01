@@ -10,7 +10,8 @@ Err that's confusing, here:
 
 ```js
 var Freud = require('freud').Freud,
-  freud = new Freud('/home/me', '/home/me/html');
+  freud = new Freud('/home/me/src', '/home/me/html'),
+  md = require('md');
 
 freud.listen('md', function (file) {
   file.data = md(file.data);
@@ -21,7 +22,7 @@ freud.listen('md', function (file) {
 freud.go();
 ```
 
-That will watch `/home/me` for files with the `.md` extension and intercept the copy to rename the file with a `.html` extension. Listen also accepts '\*:before' and '\*:after' to apply to all processing. You can probably guess when they occur. If you add a listener with '\*', it will be pushed onto the \*:before stack.
+That will watch `/home/me/src` for files with the `.md` extension and intercept the copy to rename the file with a `.html` extension. Listen also accepts '\*:before' and '\*:after' to apply to all processing. You can probably guess when they occur. If you add a listener with '\*', it will be pushed onto the \*:before stack.
 
 The file object available within your listen statements is of structure:
 ```js
@@ -41,7 +42,7 @@ If the `file.write` property is set to `false` and never reset to `true` at any 
 
 Freud also accepts an optional third parameter of an options object. The options available are as follows:
 * `monitorDot` to watch for dotfile changes, default is `false`
-* `monitorSquiggle` to watch for files with names ending with ~, such as are common for backups.
+* `monitorSquiggle` to watch for files with names ending with ~, such as are common for backups. Default is `false`
 
 ### events ###
 
