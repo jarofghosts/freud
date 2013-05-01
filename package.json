@@ -7,7 +7,7 @@
     "mutating",
     "utility"
   ],
-  "version": "0.1.6",
+  "version": "0.1.7",
   "author": "jesse keane <me@jessekeane.me> (http://jessekeane.me)",
   "main": "index.js",
   "repository": {
@@ -19,6 +19,6 @@
   },
   "license": "BSD",
   "scripts": {
-    "test": "node test/run.js"
+    "test": "node test/mutations.js && node test/mutations-advanced.js"
   }
 }
