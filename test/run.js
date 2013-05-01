@@ -27,7 +27,7 @@ freud.on('compiling', function (filename) {
 });
 
 freud.on('started', function (version) {
-  assert.equal(version.version, '0.1.3');
+  assert.equal(version.version, '0.1.5');
 });
 
 freud.on('compiled', function (filename) {
