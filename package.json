@@ -1,12 +1,21 @@
 {
   "name": "freud",
   "description": "copy and mutate files by extension",
+  "tags": [
+    "filesystem",
+    "copying",
+    "mutating",
+    "utility"
+  ],
   "version": "0.1.5",
   "author": "jesse keane <me@jessekeane.me> (http://jessekeane.me)",
-  "main": "index",
+  "main": "index.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/jarofghosts/freud.git"
+  },
+  "bugs": {
+    "url": "https://github.com/jarofghosts/freud/issues"
   },
   "license": "BSD",
   "scripts": {
