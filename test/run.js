@@ -30,8 +30,20 @@ freud.on('started', function (version) {
   assert.equal(version.version, '0.1.3');
 });
 
+freud.on('compiled', function (filename) {
+  assert.equal(filename, 'testfile.text');
+  assert.equal(fs.existsSync('freudtest-dst/testfile.text'), true);
+  assert.equal(fs.readFileSync('freudtest-dst/testfile.text', { encoding: 'utf8' }), 'y hallo thar');
+  freud.stop();
+});
+
+freud.on('stopped', function () {
+  fs.unlinkSync('freudtest-src/testfile.txt');
+  fs.unlinkSync('freudtest-dst/testfile.text');
+  fs.rmdirSync('freudtest-src');
+  fs.rmdirSync('freudtest-dst');
+});
+
 freud.go();
 
 fs.writeFileSync('freudtest-src/testfile.txt', 'why hello there');
-assert.equal(fs.existsSync('freudtest-dst/testfile.text'), true);
-assert.equal(fs.readFileSync('freudtest-dst/testfile.text', { encoding: 'utf8' }), 'y hallo thar');
