@@ -2,6 +2,8 @@ FREUD.js
 ====
 ----
 
+[![Build Status](https://travis-ci.org/jarofghosts/freud.png?branch=master)](https://travis-ci.org/jarofghosts/freud)
+
 Freud watches directories and copies files between them. It allows you to mutate the file information before rendering used callbacks attached to routes that look up the file extension.
 
 Err that's confusing, here:
