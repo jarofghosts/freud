@@ -3,11 +3,16 @@
   "description": "copy and mutate files by extension",
   "tags": [
     "filesystem",
-    "copying",
-    "mutating",
+    "files",
+    "modify",
+    "sync",
+    "link",
+    "copy",
+    "mutate",
+    "util",
     "utility"
   ],
-  "version": "0.1.8",
+  "version": "0.1.9",
   "author": "jesse keane <me@jessekeane.me> (http://jessekeane.me)",
   "main": "index.js",
   "repository": {
@@ -19,7 +24,7 @@
   },
   "license": "BSD",
   "scripts": {
-    "test": "node test/mutations.js && node test/mutations-advanced.js"
+    "test": "node test/mutations.js && node test/options.js && node test/mutations-advanced.js"
   },
   "engines": {
     "node": ">=0.10"
