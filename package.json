@@ -7,7 +7,7 @@
     "mutating",
     "utility"
   ],
-  "version": "0.1.7",
+  "version": "0.1.8",
   "author": "jesse keane <me@jessekeane.me> (http://jessekeane.me)",
   "main": "index.js",
   "repository": {
