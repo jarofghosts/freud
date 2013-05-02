@@ -27,6 +27,6 @@
     "test": "node test/mutations.js && node test/options.js && node test/mutations-advanced.js"
   },
   "engines": {
-    "node": ">=0.6"
+    "node": ">=0.8"
   }
 }
