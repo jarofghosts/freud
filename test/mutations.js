@@ -23,7 +23,7 @@ freud.listen('*:after', function (file) {
 });
 
 freud.on('started', function (freud) {
-  assert.equal(freud.version, '0.1.9');
+  assert.equal(freud.version, '0.1.10');
   assert.equal(freud.source, 'freudtest-src/');
   assert.equal(freud.target, 'freudtest-dst/');
 });
@@ -35,14 +35,14 @@ freud.on('extensionAdded', function (extension) {
 freud.on('compiled', function (filename) {
   assert.equal(filename, 'testfile.text');
   assert.ok(fs.existsSync('freudtest-dst/testfile.text'));
-  assert.equal(fs.readFileSync('freudtest-dst/testfile.text', { encoding: 'utf8' }), 'y hallo thar');
+  assert.equal(fs.readFileSync('freudtest-dst/testfile.text', 'utf8'), 'y hallo thar');
 
   fs.unlinkSync('freudtest-src/testfile.txt');
 });
 
 freud.on('recompiled', function (filename) {
   assert.equal(filename, 'testfile.text');
-  assert.equal(fs.readFileSync('freudtest-dst/testfile.text', { encoding: 'utf8' }), 'howdy');
+  assert.equal(fs.readFileSync('freudtest-dst/testfile.text', 'utf8'), 'howdy');
   fs.unlinkSync('freudtest-src/testfile.txt');
 });
 

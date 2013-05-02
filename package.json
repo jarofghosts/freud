@@ -12,7 +12,7 @@
     "util",
     "utility"
   ],
-  "version": "0.1.9",
+  "version": "0.1.10",
   "author": "jesse keane <me@jessekeane.me> (http://jessekeane.me)",
   "main": "index.js",
   "repository": {
@@ -27,6 +27,6 @@
     "test": "node test/mutations.js && node test/options.js && node test/mutations-advanced.js"
   },
   "engines": {
-    "node": ">=0.10"
+    "node": ">=0.6"
   }
 }
