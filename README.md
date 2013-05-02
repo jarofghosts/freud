@@ -4,7 +4,7 @@ FREUD.js
 
 [![Build Status](https://travis-ci.org/jarofghosts/freud.png?branch=master)](https://travis-ci.org/jarofghosts/freud)
 
-Freud watches directories and copies files between them. It allows you to mutate the file information before rendering used callbacks attached to routes that look up the file extension.
+Freud watches directories and copies files between them. It allows you to modify the file information before rendering using callbacks attached to file extensions.
 
 Err that's confusing, here:
 
@@ -24,7 +24,9 @@ freud.listen('md', function (file) {
 freud.go();
 ```
 
-That will watch `/home/me/src` for files with the `.md` extension and intercept the copy to rename the file with a `.html` extension. Listen also accepts '\*:before' and '\*:after' to apply to all processing. You can probably guess when they occur. If you add a listener with '\*', it will be pushed onto the \*:before stack.
+That will watch `/home/me/src` for changes to files with the `.md` extension. When there is one, it will run the file contents through `md`, our theoretical Markdown processor, and change the extension to `.html` before dumping the mutated file into `/home/me/html`. Of course the origin file is never modified in any way.
+
+Listen also accepts '\*:before' and '\*:after' to apply to all processing. You can probably guess when they occur. If you add a listener with '\*', it will be pushed onto the \*:before stack.
 
 The file object available within your listen statements is of structure:
 ```js
