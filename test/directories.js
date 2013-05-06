@@ -3,11 +3,16 @@ var Freud = require('../lib/freud').Freud,
   assert = require('assert'),
   fs = require('fs');
 
-freud.on('compiled', function (filename) {
-  assert.ok(filename.match(/dir-test$/));
-  assert.ok(fs.existsSync('freudtest-dst/dir-test'));
+freud.listen('/*:after', function (dir) {
+  dir.name = 'test-dir';
+  return dir;
+});
 
-  var stats = fs.statSync('freudtest-dst/dir-test');
+freud.on('compiled', function (filename) {
+  assert.ok(filename.match(/test-dir$/));
+  assert.ok(fs.existsSync('freudtest-dst/test-dir'));
+
+  var stats = fs.statSync('freudtest-dst/test-dir');
   assert.ok(stats.isDirectory());
   fs.rmdirSync('freudtest-src/dir-test');
 
@@ -17,8 +22,8 @@ freud.on('unlinked', function (filename) {
 
   if (filename) {
 
-    assert.ok(filename.match(/dir-test$/));
-    assert.ok(!fs.existsSync('freudtest-dst/dir-test'));
+    assert.ok(filename.match(/test-dir$/));
+    assert.ok(!fs.existsSync('freudtest-dst/test-dir'));
 
     freud.stop();
 
