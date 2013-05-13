@@ -65,7 +65,7 @@ Freud will also emit certain events that may be useful, such as:
 + `recompiled` after a successful compilation triggered by `freud.recompile(filename)`.
 + `blocked` whenever a write to the target has been canceled due to `file.write` being set to `false`.
 + `unlinked` when a file has been unlinked due to removal of the file in the source directory.
-+ `copying` when rules are not present for a given file extension, the file will be simply copied rather than parsed in any way.
++ `copying` when a file has no rules it will be copied rather than processed for better performance.
 + `copied` when copying has occured.
 
 ### license ###
