@@ -12,7 +12,7 @@
     "util",
     "utility"
   ],
-  "version": "0.2.7",
+  "version": "0.2.8",
   "author": "jesse keane <me@jessekeane.me> (http://jessekeane.me)",
   "main": "index.js",
   "repository": {
@@ -24,7 +24,7 @@
   },
   "license": "BSD",
   "scripts": {
-    "test": "node test/mutations.js && node test/vanilla-copy.js && node test/array-args.js && node test/options.js && node test/directories.js && node test/mutations-advanced.js"
+    "test": "node test/mutations.js && node test/vanilla-copy.js && node test/case.js && node test/array-args.js && node test/options.js && node test/directories.js && node test/mutations-advanced.js"
   },
   "engines": {
     "node": ">=0.8"
