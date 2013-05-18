@@ -53,6 +53,7 @@ The directory object is similar, only without the data attribute. Again, setting
 Freud also accepts an optional third parameter of an options object. The options available are as follows:
 + `monitorDot` to watch for dotfile changes, default is `false`
 + `monitorSquiggle` to watch for files with names ending with ~, such as are common for backups. Default is `false`
++ `ignoreCase` to not match case on event/listener matching. Default is `false`
 
 ### events ###
 
