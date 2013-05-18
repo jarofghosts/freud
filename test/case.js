@@ -1,5 +1,31 @@
 var Freud = require('../lib/freud').Freud,
-  freud = new Freud('freudtest-src', 'freudtest-dst'),
+  freud = new Freud('freudtest-src', 'freudtest-dst', { "ignoreCase": true }),
   assert = require('assert'),
-  fs = require('fs');
+  fs = require('fs'),
+  testTimeout = setTimeout(function () {
+      assert.ok(false);
+  }, 500);
   
+freud.listen('md', function (file) {
+  file.data = file.data.replace(/duh/, 'huh');
+  
+  return file;
+})
+
+freud.on('compiling', function (filename) {
+  assert.assertEqual(filename, 'testcaps.MD');
+  clearTimeout(testTimeout);
+});
+
+freud.on('compiled', function () {
+  assert.assertEqual(fs.readFileSync('freudtest-dst/testcaps.MD', 'utf8'), 'huh');
+  fs.unlinkSync('freudtest-src/testcaps.MD');
+});
+
+freud.on('unlinked', function () {
+  freud.stop();
+});
+
+freud.go();  
+
+fs.writeFileSync('freudtest-src/testcaps.MD', 'duh');
