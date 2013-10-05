@@ -79,7 +79,7 @@ Freud.prototype.listen = function (extension, callback) {
 }
 
 Freud.prototype.checkStats = function (filename, callback) {
-  analysis.getFile(this.source, filename, parseStats)
+  analysis.getFile(this.source, filename, parseStats.bind(this))
   
   function parseStats(file) {
     if (file.stats === undefined) return callback(false, undefined);
@@ -150,13 +150,9 @@ Freud.prototype.eventResponse = function (event, filename) {
 }
 
 Freud.prototype.processFile = function (file, callback) {
-  analysis.executeRules(this.rules['*:before'], file, function (file) {
-    analysis.executeRules(this.rules[this.options.ignoreCase ? file.extension.toLowerCase() : file.extension], file, function (file) {
-      analysis.executeRules(this.rules['*:after'], file, function (file) {
-        callback(file)
-      })
-    })
-  })
+  var rules = this.rules['*:before'].concat(this.rules[this.options.ignoreCase ? file.extension.toLowerCase() : file.extension]).concat(this.rules['*:after'])
+
+  analysis.executeRules(rules, file, callback)
 }
 
 Freud.prototype.processDir = function (dirname, callback) {
