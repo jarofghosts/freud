@@ -53,7 +53,7 @@ Freud.prototype.doUnlink = function (filename) {
 Freud.prototype.recompile = function (filename) {
   var extension = filename.split('.').pop();
   if (this.rules[extension] || this.rules['*:before'] || this.rules['*:after']) {
-    return analysis.compileFile(this, filename, recompileFile)
+    return this.compileFile(filename, recompileFile)
   }
   fs.exists(path.join(this.target, filename), moveFile)
 
@@ -123,20 +123,20 @@ Freud.prototype.eventResponse = function (event, filename) {
   if (!filename) return this.emit('error', new Error('fs.watch error'))
 
   if ((!/^\./.test(filename) || this.options.monitorDot) && (!/~$/.test(filename) || this.options.monitorSquiggle)) {
-    this.checkStats(filename, statResult)
+    this.checkStats(filename, statResult.bind(this))
   }
 
   function statResult(isDuplicate, stats) {
     if (isDuplicate) return
     if (stats && stats.isDirectory()) {
-      return analysis.compileDir(this, filename, fileCompiled)
+      return this.compileDir(this, filename, fileCompiled)
     }
     var extension = filename.split('.').pop()
     extension = this.options.ignoreCase ? extension.toLowerCase() : extension
     if (this.rules[extension] || this.rules['*:before'] || this.rules['*:after']) {
-      return analysis.compileFile(this, filename, fileCompiled)
+      return this.compileFile(filename, fileCompiled.bind(this))
     }
-    fs.exists(this.source + filename, fileMove)
+    fs.exists(this.source + filename, fileMove.bind(this))
   }
 
   function fileMove(linkFile) {
@@ -148,6 +148,7 @@ Freud.prototype.eventResponse = function (event, filename) {
     if (!written) this.emit('blocked', filename)
   }
 }
+
 Freud.prototype.processFile = function (file, callback) {
   analysis.executeRules(this.rules['*:before'], file, function (file) {
     analysis.executeRules(this.rules[this.options.ignoreCase ? file.extension.toLowerCase() : file.extension], file, function (file) {
@@ -174,23 +175,20 @@ Freud.prototype.processDir = function (dirname, callback) {
 Freud.prototype.compileFile = function (filename, callback) {
   this.emit('compiling', filename)
 
-  fs.exists(freud.source + filename, function (inputFileExists) {
-    if (inputFileExists) {
-      analysis.getFile(freud.source, filename, function (file) {
-        this.processFile(freud, file, function (file) {
-          if (file.write) {
-            analysis.putFile(freud.target, file, function () {
-              callback(file.name, true)
-            });
-          } else {
-            callback(file.name, false)
-          }
-        })
+  fs.exists(path.join(this.source, filename), checkFile.bind(this))
+
+  function checkFile(inputFileExists) {
+    if (!inputFileExists) return this.doUnlink(filename)
+    analysis.getFile(this.source, filename, parseFile.bind(this))
+    function parseFile(file) {
+      this.processFile(file, function (file) {
+        if (!file.write) return callback(file.name, false)
+          analysis.putFile(this.target, file, function () {
+            callback(file.name, true)
+          })
       })
-    } else {
-      doUnlink(freud, filename)
     }
-  })
+  }
 }
 
 Freud.prototype.compileDir = function (filename, callback) {
