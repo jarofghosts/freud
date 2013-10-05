@@ -30,10 +30,10 @@ Freud.prototype.doUnlink = function (filename) {
     data: ''
   }
 
-  this.processFile(dummyFile, parseFile)
+  this.processFile(dummyFile, parseFile.bind(this))
 
   function parseFile(file) {
-    analysis.unlink('file', this.target, file.name, checkUnlink)
+    analysis.unlink('file', this.target, file.name, checkUnlink.bind(this))
 
     function checkUnlink(err, didUnlink) {
       if (!err && didUnlink) return this.emit('unlinked', file.name);
@@ -150,7 +150,13 @@ Freud.prototype.eventResponse = function (event, filename) {
 }
 
 Freud.prototype.processFile = function (file, callback) {
-  var rules = this.rules['*:before'].concat(this.rules[this.options.ignoreCase ? file.extension.toLowerCase() : file.extension]).concat(this.rules['*:after'])
+  var rules = [].concat(
+      (this.rules['*:before'] || [])
+      .concat(
+      (this.rules[this.options.ignoreCase ? file.extension.toLowerCase() : file.extension] || [])
+      .concat(
+      (this.rules['*:after'] || []))
+    ))
 
   analysis.executeRules(rules, file, callback)
 }
@@ -158,7 +164,13 @@ Freud.prototype.processFile = function (file, callback) {
 Freud.prototype.processDir = function (dirname, callback) {
 
   var dir = { name: dirname, write: true },
-      rules = this.rules['/*:before'].concat(this.rules['/']).concat(this.rules['/*:after'])
+      rules = [].concat(
+          (this.rules['/*:before'] || [])
+          .concat(
+          (this.rules['/'] || [])
+          .concat(
+          (this.rules['/*:after'] ||[]))
+        ))
 
   analysis.executeRules(rules, dir, callback)
 }
@@ -172,12 +184,13 @@ Freud.prototype.compileFile = function (filename, callback) {
     if (!inputFileExists) return this.doUnlink(filename)
     analysis.getFile(this.source, filename, parseFile.bind(this))
     function parseFile(file) {
-      this.processFile(file, function (file) {
+      this.processFile(file, putFile.bind(this))
+
+      function putFile(file) {
         if (!file.write) return callback(file.name, false)
-          analysis.putFile(this.target, file, function () {
-            callback(file.name, true)
-          })
-      })
+
+        analysis.putFile(this.target, file, callback.bind(null, file.name, true))
+      }
     }
   }
 }
