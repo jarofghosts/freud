@@ -45,7 +45,23 @@ Freud.prototype.recompile = function (filename) {
 
 Freud.prototype.listen = function (extension, callback) {
   if (!Array.isArray(extension)) extension = [extension]
-  analysis.attachListeners(this, extension, callback)
+  this.attachListeners(extension, callback)
+}
+
+Freud.prototype.attachListeners = function (extensions, callback) {
+
+  extensions.forEach(doAttach.bind(this))
+
+  function doAttach(extension) {
+    extension = extension === '*' ? '*:before' : extension;
+    extension = extension === '/*' ? '/*:before' : extension;
+    extension = this.options.ignoreCase ? extension.toLowerCase() : extension;
+
+    this.rules[extension] = freud.rules[extension] || [];
+    this.rules[extension].push(callback);
+    this.emit('extensionAdded', extension);
+  }
+
 }
 
 Freud.prototype.go = function () {
