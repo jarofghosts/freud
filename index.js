@@ -82,7 +82,7 @@ Freud.prototype.checkStats = function (filename, callback) {
   analysis.getFile(this.source, filename, parseStats.bind(this))
   
   function parseStats(file) {
-    if (file.stats === undefined) return callback(false, undefined);
+    if (file.stats === undefined) return callback(null, undefined);
     
     var theMTime = file.stats.mtime.getTime(),
         duplicate = this.processed[filename] && this.processed[filename] === theMTime
@@ -157,15 +157,10 @@ Freud.prototype.processFile = function (file, callback) {
 
 Freud.prototype.processDir = function (dirname, callback) {
 
-  var dir = { name: dirname, write: true }
+  var dir = { name: dirname, write: true },
+      rules = this.rules['/*:before'].concat(this.rules['/']).concat(this.rules['/*:after'])
 
-  analysis.executeRules(this.rules['/*:before'], dir, function (dir) {
-    analysis.executeRules(this.rules['/'], dir, function (dir) {
-      analysis.executeRules(this.rules['/*:after'], dir, function (dir) {
-        callback(dir)
-      })
-    })
-  })
+  analysis.executeRules(rules, dir, callback)
 }
 
 Freud.prototype.compileFile = function (filename, callback) {
