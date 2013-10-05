@@ -12,7 +12,7 @@
     "util",
     "utility"
   ],
-  "version": "0.2.8",
+  "version": "0.2.9",
   "author": "jesse keane <me@jessekeane.me> (http://jessekeane.me)",
   "main": "index.js",
   "repository": {
@@ -22,7 +22,7 @@
   "bugs": {
     "url": "https://github.com/jarofghosts/freud/issues"
   },
-  "license": "BSD",
+  "license": "MIT",
   "scripts": {
     "test": "node test/mutations.js && node test/vanilla-copy.js && node test/case.js && node test/array-args.js && node test/options.js && node test/directories.js && node test/mutations-advanced.js"
   },
