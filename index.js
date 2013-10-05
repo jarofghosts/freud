@@ -133,11 +133,11 @@ Freud.prototype.eventResponse = function (event, filename) {
     if (this.rules[extension] || this.rules['*:before'] || this.rules['*:after']) {
       return this.compileFile(filename, fileCompiled.bind(this))
     }
-    fs.exists(this.source + filename, fileMove.bind(this))
+    fs.exists(path.join(this.source, filename), fileMove.bind(this))
   }
 
   function fileMove(linkFile) {
-    this[(linkFile ? 'copyFile' : 'doUnlink')](filename)
+    this[linkFile ? 'copyFile' : 'doUnlink'](filename)
   }
 
   function fileCompiled(filename, written) {
@@ -186,7 +186,9 @@ Freud.prototype.compileFile = function (filename, callback) {
       function putFile(file) {
         if (!file.write) return callback(file.name, false)
 
-        analysis.putFile(this.target, file, callback.bind(null, file.name, true))
+        analysis.putFile(this.target, file, function () {
+          callback(file.name, true)
+        }.bind(this))
       }
     }
   }
@@ -203,7 +205,9 @@ Freud.prototype.compileDir = function (filename, callback) {
     this.processDir(filename, processedDir.bind(this))
     function onProcess(dir) {
       if (!dir.write) return callback(dir.name, false);
-      analysis.putDir(this.target, dir.name, callback.bind(null, dir.name, true))
+      analysis.putDir(this.target, dir.name, function() {
+        callback && callback(dir.name, true)
+      }.bind(this))
     }
     function processedDir(dir) {
 
