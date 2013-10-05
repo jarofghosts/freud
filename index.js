@@ -148,6 +148,75 @@ Freud.prototype.eventResponse = function (event, filename) {
     if (!written) this.emit('blocked', filename)
   }
 }
+Freud.prototype.processFile = function (file, callback) {
+  analysis.executeRules(this.rules['*:before'], file, function (file) {
+    analysis.executeRules(this.rules[this.options.ignoreCase ? file.extension.toLowerCase() : file.extension], file, function (file) {
+      analysis.executeRules(this.rules['*:after'], file, function (file) {
+        callback(file)
+      })
+    })
+  })
+}
+
+Freud.prototype.processDir = function (dirname, callback) {
+
+  var dir = { name: dirname, write: true }
+
+  analysis.executeRules(this.rules['/*:before'], dir, function (dir) {
+    analysis.executeRules(this.rules['/'], dir, function (dir) {
+      analysis.executeRules(this.rules['/*:after'], dir, function (dir) {
+        callback(dir)
+      })
+    })
+  })
+}
+
+Freud.prototype.compileFile = function (filename, callback) {
+  this.emit('compiling', filename)
+
+  fs.exists(freud.source + filename, function (inputFileExists) {
+    if (inputFileExists) {
+      getFile(freud.source, filename, function (file) {
+        processFile(freud, file, function (file) {
+          if (file.write) {
+            putFile(freud.target, file, function () {
+              callback(file.name, true)
+            });
+          } else {
+            callback(file.name, false)
+          }
+        })
+      })
+    } else {
+      doUnlink(freud, filename)
+    }
+  })
+}
+
+Freud.prototype.compileDir = function (filename, callback) {
+  this.emit('compiling', filename)
+
+  fs.exists(path.join(this.source, filename), function (inputDirExists) {
+    if (inputDirExists) {
+      this.processDir(filename, function (dir) {
+        if (dir.write) {
+          analysis.putDir(this.target, dir.name, function () {
+            callback(dir.name, true);
+          })
+        } else {
+          callback(dir.name, false);
+        }
+      })
+    } else {
+
+      this.processDir(filename, function (dir) {
+        analysis.unlink('dir', this.target, dir.name, function () {
+          this.emit('unlinked', dir.name);
+        })
+      })
+    }
+  })
+}
 
 Freud.prototype.stop = function (cb) {
   this.listener.close()
