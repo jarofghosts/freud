@@ -5,8 +5,11 @@ var fs = require('fs'),
     util = require('util')
 
 exports.Freud = Freud
+exports.createFreud = createFreud
 
 function Freud(source, target, options) {
+  if (!(this instanceof Freud)) return new Freud(source, target, options)
+
   this.source = path.normalize(source)
   this.target = path.normalize(target)
   this.processed = []
@@ -154,7 +157,7 @@ Freud.prototype.processFile = function (file, callback) {
       .concat(
       (this.rules['*:after'] || []))
     ))
-
+  if (!rules.length) return callback(file)
   analysis.executeRules(rules, file, callback)
 }
 
@@ -169,6 +172,7 @@ Freud.prototype.processDir = function (dirname, callback) {
           (this.rules['/*:after'] ||[]))
         ))
 
+  if (!rules.length) return callback(dir)
   analysis.executeRules(rules, dir, callback)
 }
 
@@ -205,7 +209,7 @@ Freud.prototype.compileDir = function (filename, callback) {
     this.processDir(filename, processedDir.bind(this))
     function onProcess(dir) {
       if (!dir.write) return callback(dir.name, false);
-      analysis.putDir(this.target, dir.name, function() {
+      analysis.putDir(this.target, dir.name, function () {
         callback && callback(dir.name, true)
       }.bind(this))
     }
@@ -225,5 +229,9 @@ Freud.prototype.stop = function (cb) {
   this.emit('stopped')
 
   cb && cb()
+}
+
+function createFreud(source, destination, options) {
+  return new Freud(source, destination, options)
 }
 
