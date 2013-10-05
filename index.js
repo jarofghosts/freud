@@ -114,7 +114,7 @@ Freud.prototype.go = function () {
 
 Freud.prototype.copyFile = function (filename) {
   this.emit('copying')
-  fs.link(path.join(this.source + filename), path.join(this.target + filename), function () {
+  fs.link(path.join(this.source, filename), path.join(this.target, filename), function () {
     this.emit('copied', filename)
   }.bind(this))
 }

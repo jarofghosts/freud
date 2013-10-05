@@ -46,7 +46,6 @@ freud.on('recompiled', function (filename) {
 });
 
 freud.on('unlinked', function (filename) {
-  console.log('unlinked')
   assert.equal(filename, 'testfile.text');
   assert.ok(!fs.existsSync('freudtest-dst/testfile.text'));
 
