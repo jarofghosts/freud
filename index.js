@@ -176,10 +176,10 @@ Freud.prototype.compileFile = function (filename, callback) {
 
   fs.exists(freud.source + filename, function (inputFileExists) {
     if (inputFileExists) {
-      getFile(freud.source, filename, function (file) {
-        processFile(freud, file, function (file) {
+      analysis.getFile(freud.source, filename, function (file) {
+        this.processFile(freud, file, function (file) {
           if (file.write) {
-            putFile(freud.target, file, function () {
+            analysis.putFile(freud.target, file, function () {
               callback(file.name, true)
             });
           } else {
