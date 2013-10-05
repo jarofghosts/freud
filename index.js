@@ -4,8 +4,9 @@ var fs = require('fs'),
     analysis = require('./lib/analysis.js'),
     util = require('util')
 
-function Freud(source, target, options) {
+exports.Freud = Freud
 
+function Freud(source, target, options) {
   this.source = path.normalize(source)
   this.target = path.normalize(target)
   this.processed = []
@@ -14,42 +15,42 @@ function Freud(source, target, options) {
   this.listener = {}
   this.version = require(path.join(__dirname, 'package.json')).version
 
-  this.listen = function (extension, callback) {
-    if (!(extension instanceof Array)) { extension = [extension]; }
-    analysis.attachListeners(this, extension, callback);
-  };
+  return this
+}
 
-  this.recompile = function (filename) {
-    var self = this;
+util.inherits(Freud, events.EventEmitter)
 
-    var extension = filename.split('.').pop();
-    if (self.rules[extension] || self.rules['*:before'] || self.rules['*:after']) {
-      analysis.compileFile(self, filename, function (filename, written) {
-        self.emit('recompiled', filename);
-        if (!written) {
-          self.emit('blocked', filename);
-        }
-      });
+Freud.prototype.recompile = function (filename) {
+  var extension = filename.split('.').pop();
+  if (this.rules[extension] || this.rules['*:before'] || this.rules['*:after']) {
+    return analysis.compileFile(this, filename, recompileFile)
+  }
+  fs.exists(path.join(this.target, filename), moveFile)
+
+  function moveFile(fileExists) {
+    if (fileExists) {
+      fs.unlink(path.join(this.target, filename), function (err) {
+        analysis.copyFile(this, filename);
+      })
     } else {
-      fs.exists(self.target + filename, function (fileExists) {
-        if (fileExists) {
-          fs.unlink(self.target + filename, function (err) {
-            analysis.copyFile(self, filename);
-          });
-        } else {
-          analysis.copyFile(self, filename);
-        }
-      });
+      analysis.copyFile(this, filename);
     }
-  };
+  }
 
-  return this;
+  function recompileFile(filename, written) {
+    this.emit('recompiled', filename);
+    if (!written) this.emit('blocked', filename)
+  }
+}
+
+Freud.prototype.listen = function (extension, callback) {
+  if (!Array.isArray(extension)) extension = [extension]
+  analysis.attachListeners(this, extension, callback)
 }
 
 Freud.prototype.go = function () {
-
-  this.listener = fs.watch(source, { persistent: true }, this.eventResponse.bind(this))
-  this.emit('started', self);
+  this.listener = fs.watch(this.source, { persistent: true }, this.eventResponse)
+  this.emit('started', this);
 }
 
 Freud.prototype.eventResponse = function (event, filename) {
@@ -57,13 +58,13 @@ Freud.prototype.eventResponse = function (event, filename) {
   if (!filename) return this.emit('error', new Error('fs.watch error'))
 
   if ((!/^\./.test(filename) || this.options.monitorDot) && (!/~$/.test(filename) || this.options.monitorSquiggle)) {
-    analysis.checkStats(this, filename, statResult)
+    analysis.checkStats(this, filename, statResult.bind(this))
   }
 
   function statResult(isDuplicate, stats) {
     if (isDuplicate) return
     if (stats && stats.isDirectory()) {
-      return analysis.compileDir(self, filename, fileCompiled)
+      return analysis.compileDir(this, filename, fileCompiled)
     }
     var extension = filename.split('.').pop()
     extension = this.options.ignoreCase ? extension.toLowerCase() : extension
@@ -90,5 +91,3 @@ Freud.prototype.stop = function (cb) {
   cb && cb()
 }
 
-util.inherits(Freud, events.EventEmitter)
-exports.Freud = Freud

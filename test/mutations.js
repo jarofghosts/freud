@@ -23,9 +23,8 @@ freud.listen('*:after', function (file) {
 });
 
 freud.on('started', function (freud) {
-  assert.equal(freud.version, '0.2.8');
-  assert.equal(freud.source, 'freudtest-src/');
-  assert.equal(freud.target, 'freudtest-dst/');
+  assert.equal(freud.source, 'freudtest-src');
+  assert.equal(freud.target, 'freudtest-dst');
 });
 
 freud.on('extensionAdded', function (extension) {
