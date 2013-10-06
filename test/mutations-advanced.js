@@ -1,7 +1,7 @@
 var Freud = require('../').Freud,
-  freud = new Freud('freudtest-src', 'freudtest-dst'),
-  assert = require('assert'),
-  fs = require('fs');
+    freud = new Freud('freudtest-src', 'freudtest-dst'),
+    assert = require('assert'),
+    fs = require('fs');
 
 freud.listen('md', function (file) {
   file.write = false;

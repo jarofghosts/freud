@@ -22,6 +22,7 @@ freud.on('compiled', function (filename) {
 freud.on('unlinked', function () {
   unlinkedFiles++;
   if (unlinkedFiles == 2) {
+    console.log('aa done')
     freud.stop();
   }
 });

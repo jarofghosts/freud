@@ -25,6 +25,7 @@ function Freud(source, target, options) {
 util.inherits(Freud, events.EventEmitter)
 
 Freud.prototype.doUnlink = function (filename, stats) {
+  filename = path.basename(filename)
   var dummyFile = {
     name: filename,
     fullPath: path.join(this.source + filename),
@@ -91,11 +92,12 @@ Freud.prototype.attachListeners = function (extensions, callback) {
 }
 
 Freud.prototype.go = function (cb) {
+  var noRecurseRegexp = new RegExp(this.source + '/?$')
   this.listener = new Watcher({
-    paths: [this.source],
+    paths: this.source,
     filters: {
       includeDir: function (dirName) {
-        return dirName == this.source
+        return noRecurseRegexp.test(dirName)
       },
       includeFile: function (fileName) {
         if (!this.options.monitorDot && /^\./.test(fileName)) return false
@@ -131,6 +133,8 @@ Freud.prototype.copyFile = function (filename) {
 
 Freud.prototype.eventResponse = function (filename, stats) {
 
+  filename = path.basename(filename)
+
   if (stats && stats.isDirectory()) {
     return this.compileDir(filename, fileCompiled.bind(this))
   }
@@ -140,7 +144,7 @@ Freud.prototype.eventResponse = function (filename, stats) {
     return this.compileFile(filename, fileCompiled.bind(this))
   }
 
-  this.copyFile(fileName)
+  this.copyFile(filename)
 
   function fileCompiled(filename, written) {
     this.emit('compiled', filename)
@@ -177,7 +181,9 @@ Freud.prototype.processDir = function (dirname, callback) {
 
 Freud.prototype.compileFile = function (filename, callback) {
   this.emit('compiling', filename)
-  analysis.getFile(this.source, filename, this.processFile.bind(this, file, putFile.bind(this)))
+  analysis.getFile(this.source, filename, function (file) {
+    this.processFile(file, putFile.bind(this))
+  }.bind(this))
 
   function putFile(file) {
     if (!file.write) return callback(file.name, false)
@@ -201,7 +207,7 @@ Freud.prototype.compileDir = function (filename, callback) {
 }
 
 Freud.prototype.stop = function (cb) {
-  this.listener && this.listener.close()
+  this.listener && this.listener.stop()
   this.emit('stopped')
 
   cb && cb()
