@@ -1,8 +1,8 @@
-var Freud = require('../lib/freud').Freud,
-  freud = new Freud('freudtest-src', 'freudtest-dst', { monitorDot: true, monitorSquiggle: true }),
-  assert = require('assert'),
-  fs = require('fs'),
-  deleted = 0;
+var Freud = require('../').Freud,
+    freud = new Freud('freudtest-src', 'freudtest-dst', { monitorDot: true, monitorSquiggle: true }),
+    assert = require('assert'),
+    fs = require('fs'),
+    deleted = 0;
 
 freud.listen('txt', function (file) {
   file.data = file.data.replace(/why hello there/, 'howdy');
