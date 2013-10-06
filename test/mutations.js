@@ -52,8 +52,7 @@ freud.on('unlinked', function (filename) {
   freud.stop();
 });
 
-assert.doesNotThrow(function () {
-  freud.go();
-});
-
-fs.writeFileSync('freudtest-src/testfile.txt', 'why hello there');
+freud.go(function (err) {
+  assert.ok(!err)
+  fs.writeFileSync('freudtest-src/testfile.txt', 'why hello there');
+})

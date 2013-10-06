@@ -24,7 +24,7 @@ function Freud(source, target, options) {
 
 util.inherits(Freud, events.EventEmitter)
 
-Freud.prototype.doUnlink = function (filename) {
+Freud.prototype.doUnlink = function (filename, stats) {
   var dummyFile = {
     name: filename,
     fullPath: path.join(this.source + filename),
@@ -34,22 +34,25 @@ Freud.prototype.doUnlink = function (filename) {
     data: ''
   }
 
+  if (stats.isDirectory()) {
+    return this.processDir(filename, checkDir.bind(this))
+  }
   this.processFile(dummyFile, parseFile.bind(this))
 
   function parseFile(file) {
     analysis.unlink('file', this.target, file.name, checkUnlink.bind(this))
 
     function checkUnlink(err, didUnlink) {
-      if (!err && didUnlink) return this.emit('unlinked', file.name);
-      this.processDir(filename, checkDir.bind(this))
- 
-      function checkDir(dir) {
-        analysis.unlink('dir', this.target, dir.name, checkDirUnlink.bind(this))
+      if (!err && didUnlink) return this.emit('unlinked', file.name)
+      this.emit('error', new Error('file unlink error'))
+    }
+  }
+  function checkDir(dir) {
+    analysis.unlink('dir', this.target, dir.name, checkDirUnlink.bind(this))
 
-        function checkDirUnlink(err, didUnlink) {
-          if (!err && didUnlink) this.emit('unlinked', dir.name);
-        }
-      }
+    function checkDirUnlink(err, didUnlink) {
+      if (!err && didUnlink) return this.emit('unlinked', dir.name);
+      this.emit('error', new Error('dir unlink error'))
     }
   }
 }
@@ -59,14 +62,7 @@ Freud.prototype.recompile = function (filename) {
   if (this.rules[extension] || this.rules['*:before'] || this.rules['*:after']) {
     return this.compileFile(filename, recompileFile.bind(this))
   }
-  fs.exists(path.join(this.target, filename), moveFile.bind(this))
-
-  function moveFile(fileExists) {
-    if (!fileExists) return this.copyFile(filename);
-    fs.unlink(path.join(this.target, filename), function (err) {
-      this.copyFile(filename);
-    })
-  }
+  this.copyFile(filename)
 
   function recompileFile(filename, written) {
     this.emit('recompiled', filename);
@@ -92,7 +88,6 @@ Freud.prototype.attachListeners = function (extensions, callback) {
     this.rules[extension].push(callback)
     this.emit('extensionAdded', extension)
   }
-
 }
 
 Freud.prototype.go = function (cb) {
@@ -144,6 +139,7 @@ Freud.prototype.eventResponse = function (filename, stats) {
   if (this.rules[extension] || this.rules['*:before'] || this.rules['*:after']) {
     return this.compileFile(filename, fileCompiled.bind(this))
   }
+
   this.copyFile(fileName)
 
   function fileCompiled(filename, written) {
@@ -172,7 +168,7 @@ Freud.prototype.processDir = function (dirname, callback) {
           .concat(
           (this.rules['/'] || [])
           .concat(
-          (this.rules['/*:after'] ||[]))
+          (this.rules['/*:after'] || []))
         ))
 
   if (!rules.length) return callback(dir)
@@ -181,49 +177,26 @@ Freud.prototype.processDir = function (dirname, callback) {
 
 Freud.prototype.compileFile = function (filename, callback) {
   this.emit('compiling', filename)
+  analysis.getFile(this.source, filename, this.processFile.bind(this, file, putFile.bind(this)))
 
-  fs.exists(path.join(this.source, filename), checkFile.bind(this))
+  function putFile(file) {
+    if (!file.write) return callback(file.name, false)
 
-  function checkFile(inputFileExists) {
-    if (!inputFileExists) return this.doUnlink(filename)
-    analysis.getFile(this.source, filename, parseFile.bind(this))
-    function parseFile(file) {
-      this.processFile(file, putFile.bind(this))
-
-      function putFile(file) {
-        if (!file.write) return callback(file.name, false)
-
-        analysis.putFile(this.target, file, function () {
-          callback(file.name, true)
-        }.bind(this))
-      }
-    }
+    analysis.putFile(this.target, file, function () {
+      callback(file.name, true)
+    }.bind(this))
   }
 }
 
 Freud.prototype.compileDir = function (filename, callback) {
   this.emit('compiling', filename)
 
-  fs.exists(path.join(this.source, filename), checkDir.bind(this))
-  function checkDir(inputDirExists) {
-    if (inputDirExists) {
-      return this.processDir(filename, onProcess.bind(this))
-    }
-    this.processDir(filename, processedDir.bind(this))
-    function onProcess(dir) {
-      if (!dir.write) return callback(dir.name, false);
-      analysis.putDir(this.target, dir.name, function () {
-        callback && callback(dir.name, true)
-      }.bind(this))
-    }
-    function processedDir(dir) {
-
-      analysis.unlink('dir', this.target, dir.name, unlinked.bind(this))
-
-      function unlinked() {
-        this.emit('unlinked', dir.name)
-      }
-    }
+  this.processDir(filename, onProcess.bind(this))
+  function onProcess(dir) {
+    if (!dir.write) return callback(dir.name, false);
+    analysis.putDir(this.target, dir.name, function () {
+      callback && callback(dir.name, true)
+    }.bind(this))
   }
 }
 
@@ -237,4 +210,3 @@ Freud.prototype.stop = function (cb) {
 function createFreud(source, destination, options) {
   return new Freud(source, destination, options)
 }
-

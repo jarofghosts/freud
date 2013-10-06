@@ -17,10 +17,12 @@ freud.on('unlinked', function () {
   freud.stop();
 });
 
-freud.go();
+freud.go(function (err) {
+  assert.ok(!err)
+  fs.writeFileSync('freudtest-src/testfile.txt', 'why hello there');
+});
 
 var eventCheck = setTimeout(function () {
   assert.ok(false);
 }, 1000);
 
-fs.writeFileSync('freudtest-src/testfile.txt', 'why hello there');

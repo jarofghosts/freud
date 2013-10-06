@@ -26,7 +26,8 @@ freud.on('unlinked', function () {
   }
 });
 
-freud.go();
-
-fs.writeFileSync('freudtest-src/test2.mkd', 'why hello there');
-fs.writeFileSync('freudtest-src/test1.md', 'why hello there');
+freud.go(function (err) {
+  assert.ok(!err)
+  fs.writeFileSync('freudtest-src/test2.mkd', 'why hello there');
+  fs.writeFileSync('freudtest-src/test1.md', 'why hello there');
+})

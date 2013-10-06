@@ -26,6 +26,8 @@ freud.on('unlinked', function () {
   freud.stop();
 });
 
-freud.go();  
+freud.go(function (err) {
+  assert.ok(!err)
+  fs.writeFileSync('freudtest-src/testcaps.MD', 'duh');
+}); 
 
-fs.writeFileSync('freudtest-src/testcaps.MD', 'duh');
