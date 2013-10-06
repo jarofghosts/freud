@@ -28,5 +28,8 @@
   },
   "engines": {
     "node": ">=0.8"
+  },
+  "dependencies": {
+    "watch-fs": "0.0.5"
   }
 }

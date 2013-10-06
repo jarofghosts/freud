@@ -2,6 +2,7 @@ var fs = require('fs'),
     events = require('events'),
     path = require('path'),
     analysis = require('./lib/analysis.js'),
+    Watcher = require('watch-fs').Watcher,
     util = require('util')
 
 exports.Freud = Freud
@@ -107,9 +108,32 @@ Freud.prototype.attachListeners = function (extensions, callback) {
 
 }
 
-Freud.prototype.go = function () {
-  this.listener = fs.watch(this.source, { persistent: true }, this.eventResponse.bind(this))
-  this.emit('started', this);
+Freud.prototype.go = function (cb) {
+  this.listener = new Watcher({
+    paths: [this.source],
+    filters: {
+      includeDir: function (dirName) {
+        return dirName == this.source
+      },
+      includeFile: function (fileName) {
+        if (!this.options.monitorDot && /^\./.test(fileName)) return false
+        if (!this.options.monitorSquiggle && /~$/.test(fileName)) return false
+        return true
+      }.bind(this)
+    }
+  })
+
+  this.listener.on('delete', this.doUnlink.bind(this))
+  this.listener.on('create', this.eventResponse.bind(this))
+  this.listener.on('change', this.eventResponse.bind(this))
+
+  this.listener.start(listenerStarted.bind(this))
+
+  function listenerStarted(err) {
+    if (err) return cb && cb(err)
+    this.emit('started', this)
+    cb && cb()
+  }
 }
 
 Freud.prototype.copyFile = function (filename) {
@@ -118,13 +142,10 @@ Freud.prototype.copyFile = function (filename) {
     this.emit('copied', filename)
   }.bind(this))
 }
-Freud.prototype.eventResponse = function (event, filename) {
 
-  if (!filename) return this.emit('error', new Error('fs.watch error'))
+Freud.prototype.eventResponse = function (filename) {
 
-  if ((!/^\./.test(filename) || this.options.monitorDot) && (!/~$/.test(filename) || this.options.monitorSquiggle)) {
-    this.checkStats(filename, statResult.bind(this))
-  }
+  this.checkStats(filename, statResult.bind(this))
 
   function statResult(isDuplicate, stats) {
     if (isDuplicate) return
@@ -136,11 +157,7 @@ Freud.prototype.eventResponse = function (event, filename) {
     if (this.rules[extension] || this.rules['*:before'] || this.rules['*:after']) {
       return this.compileFile(filename, fileCompiled.bind(this))
     }
-    fs.exists(path.join(this.source, filename), fileMove.bind(this))
-  }
-
-  function fileMove(linkFile) {
-    this[linkFile ? 'copyFile' : 'doUnlink'](filename)
+    this.copyFile(fileName)
   }
 
   function fileCompiled(filename, written) {
