@@ -79,19 +79,6 @@ Freud.prototype.listen = function (extension, callback) {
   this.attachListeners(extension, callback)
 }
 
-Freud.prototype.checkStats = function (filename, callback) {
-  analysis.getFile(this.source, filename, parseStats.bind(this))
-  
-  function parseStats(file) {
-    if (file.stats === undefined) return callback(null, undefined);
-    
-    var theMTime = file.stats.mtime.getTime(),
-        duplicate = this.processed[filename] && this.processed[filename] === theMTime
-    this.processed[filename] = theMTime;
-    callback(duplicate, file.stats);
-  }
-}
-
 Freud.prototype.attachListeners = function (extensions, callback) {
 
   extensions.forEach(doAttach.bind(this))
@@ -138,27 +125,26 @@ Freud.prototype.go = function (cb) {
 
 Freud.prototype.copyFile = function (filename) {
   this.emit('copying')
-  fs.link(path.join(this.source, filename), path.join(this.target, filename), function () {
+  var endFileStream = fs.createWriteStream(path.join(this.target, filename))
+
+  endFileStream.on('finish', function () {
     this.emit('copied', filename)
   }.bind(this))
+
+  fs.createReadStream(path.join(this.source, filename)).pipe(endFileStream)
 }
 
-Freud.prototype.eventResponse = function (filename) {
+Freud.prototype.eventResponse = function (filename, stats) {
 
-  this.checkStats(filename, statResult.bind(this))
-
-  function statResult(isDuplicate, stats) {
-    if (isDuplicate) return
-    if (stats && stats.isDirectory()) {
-      return this.compileDir(filename, fileCompiled.bind(this))
-    }
-    var extension = filename.split('.').pop()
-    extension = this.options.ignoreCase ? extension.toLowerCase() : extension
-    if (this.rules[extension] || this.rules['*:before'] || this.rules['*:after']) {
-      return this.compileFile(filename, fileCompiled.bind(this))
-    }
-    this.copyFile(fileName)
+  if (stats && stats.isDirectory()) {
+    return this.compileDir(filename, fileCompiled.bind(this))
   }
+  var extension = filename.split('.').pop()
+  extension = this.options.ignoreCase ? extension.toLowerCase() : extension
+  if (this.rules[extension] || this.rules['*:before'] || this.rules['*:after']) {
+    return this.compileFile(filename, fileCompiled.bind(this))
+  }
+  this.copyFile(fileName)
 
   function fileCompiled(filename, written) {
     this.emit('compiled', filename)
