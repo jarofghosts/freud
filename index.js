@@ -129,7 +129,7 @@ Freud.prototype.eventResponse = function (event, filename) {
   function statResult(isDuplicate, stats) {
     if (isDuplicate) return
     if (stats && stats.isDirectory()) {
-      return this.compileDir(this, filename, fileCompiled.bind(this))
+      return this.compileDir(filename, fileCompiled.bind(this))
     }
     var extension = filename.split('.').pop()
     extension = this.options.ignoreCase ? extension.toLowerCase() : extension
