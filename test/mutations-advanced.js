@@ -44,8 +44,8 @@ freud.on('blocked', function (filename) {
   assert.equal(filename, 'testfile2.md');
 });
 
-assert.doesNotThrow(function () {
-  freud.go();
+freud.go(function (err) {
+  assert.ok(!err)
+  fs.writeFileSync('freudtest-src/testfile2.md', '*therefore i am not*');
 });
 
-fs.writeFileSync('freudtest-src/testfile2.md', '*therefore i am not*');

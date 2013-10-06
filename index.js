@@ -34,26 +34,14 @@ Freud.prototype.doUnlink = function (filename, stats) {
     stats: undefined,
     data: ''
   }
-
-  if (stats.isDirectory()) {
-    return this.processDir(filename, checkDir.bind(this))
-  }
   this.processFile(dummyFile, parseFile.bind(this))
 
   function parseFile(file) {
-    analysis.unlink('file', this.target, file.name, checkUnlink.bind(this))
+    analysis.unlink(this.target, file.name, checkUnlink.bind(this))
 
     function checkUnlink(err, didUnlink) {
       if (!err && didUnlink) return this.emit('unlinked', file.name)
       this.emit('error', new Error('file unlink error'))
-    }
-  }
-  function checkDir(dir) {
-    analysis.unlink('dir', this.target, dir.name, checkDirUnlink.bind(this))
-
-    function checkDirUnlink(err, didUnlink) {
-      if (!err && didUnlink) return this.emit('unlinked', dir.name);
-      this.emit('error', new Error('dir unlink error'))
     }
   }
 }
@@ -132,12 +120,8 @@ Freud.prototype.copyFile = function (filename) {
 }
 
 Freud.prototype.eventResponse = function (filename, stats) {
-
   filename = path.basename(filename)
 
-  if (stats && stats.isDirectory()) {
-    return this.compileDir(filename, fileCompiled.bind(this))
-  }
   var extension = filename.split('.').pop()
   extension = this.options.ignoreCase ? extension.toLowerCase() : extension
   if (this.rules[extension] || this.rules['*:before'] || this.rules['*:after']) {
@@ -164,21 +148,6 @@ Freud.prototype.processFile = function (file, callback) {
   analysis.executeRules(rules, file, callback)
 }
 
-Freud.prototype.processDir = function (dirname, callback) {
-
-  var dir = { name: dirname, write: true },
-      rules = [].concat(
-          (this.rules['/*:before'] || [])
-          .concat(
-          (this.rules['/'] || [])
-          .concat(
-          (this.rules['/*:after'] || []))
-        ))
-
-  if (!rules.length) return callback(dir)
-  analysis.executeRules(rules, dir, callback)
-}
-
 Freud.prototype.compileFile = function (filename, callback) {
   this.emit('compiling', filename)
   analysis.getFile(this.source, filename, function (file) {
@@ -190,18 +159,6 @@ Freud.prototype.compileFile = function (filename, callback) {
 
     analysis.putFile(this.target, file, function () {
       callback(file.name, true)
-    }.bind(this))
-  }
-}
-
-Freud.prototype.compileDir = function (filename, callback) {
-  this.emit('compiling', filename)
-
-  this.processDir(filename, onProcess.bind(this))
-  function onProcess(dir) {
-    if (!dir.write) return callback(dir.name, false);
-    analysis.putDir(this.target, dir.name, function () {
-      callback && callback(dir.name, true)
     }.bind(this))
   }
 }

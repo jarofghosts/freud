@@ -15,14 +15,15 @@ freud.on('compiled', function (filename) {
   compiledFiles++;
   if (compiledFiles == 2) {
     fs.unlinkSync('freudtest-src/test1.md');
-    fs.unlinkSync('freudtest-src/test2.mkd');
+    setTimeout(function () {
+      fs.unlinkSync('freudtest-src/test2.mkd');
+    }, 200)
   }
 });
 
 freud.on('unlinked', function () {
   unlinkedFiles++;
   if (unlinkedFiles == 2) {
-    console.log('aa done')
     freud.stop();
   }
 });
@@ -30,5 +31,7 @@ freud.on('unlinked', function () {
 freud.go(function (err) {
   assert.ok(!err)
   fs.writeFileSync('freudtest-src/test2.mkd', 'why hello there');
-  fs.writeFileSync('freudtest-src/test1.md', 'why hello there');
+  setTimeout(function () {
+    fs.writeFileSync('freudtest-src/test1.md', 'why hello there');
+  }, 200)
 })

@@ -18,10 +18,14 @@ freud.on('compiled', function (filename) {
 
   if (filename == '.testfile.txt') {
     assert.ok(fs.existsSync('freudtest-dst/.testfile.txt'));
-    fs.unlink('freudtest-src/.testfile.txt');
+    setTimeout(function () {
+      fs.unlink('freudtest-src/.testfile.txt');
+    }, 300)
   } else if (filename == 'testfile2.txt~') {
     assert.ok(fs.existsSync('freudtest-dst/testfile2.txt~'));
-    fs.unlink('freudtest-src/testfile2.txt~');
+    setTimeout(function () {
+      fs.unlink('freudtest-src/testfile2.txt~');
+    }, 200)
   } else {
     assert.ok(false);
   }
@@ -36,9 +40,11 @@ freud.on('unlinked', function (filename) {
   }
 });
 
-assert.doesNotThrow(function () {
-  freud.go();
+freud.go(function (err) {
+  assert.ok(!err)
+  fs.writeFileSync('freudtest-src/.testfile.txt', 'harro');
+  setTimeout(function () {
+    fs.writeFileSync('freudtest-src/testfile2.txt~', 'harro');
+  }, 200)
 });
 
-fs.writeFileSync('freudtest-src/.testfile.txt', 'harro');
-fs.writeFileSync('freudtest-src/testfile2.txt~', 'harro');

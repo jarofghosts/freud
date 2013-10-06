@@ -11,8 +11,8 @@ Err that's confusing, here:
 
 ```js
 var Freud = require('freud').Freud,
-  freud = new Freud('/home/me/src', '/home/me/html'),
-  md = require('md');
+    freud = new Freud('/home/me/src', '/home/me/html'),
+    md = require('md');
 
 freud.listen('md', function (file) {
   file.data = md(file.data);
@@ -25,7 +25,7 @@ freud.go();
 
 That will watch `/home/me/src` for changes to files with the `.md` extension. When there is one, it will run the file contents through `md`, our theoretical Markdown processor, and change the extension to `.html` before dumping the mutated file into `/home/me/html`. Of course the origin file is never modified in any way.
 
-Listen also accepts '\*:before' and '\*:after' to apply to all processed files. You can probably guess when they occur. If you add a listener with '\*', it will be pushed onto the \*:before stack. In addition, '/\*:before' and '/\*:after' can be used to apply to directories, also defaults to before. Listen *also* accepts an array of extensions to listen for, like:
+Listen also accepts '\*:before' and '\*:after' to apply to all processed files. You can probably guess when they occur. If you add a listener with '\*', it will be pushed onto the \*:before stack. Listen *also* accepts an array of extensions to listen for, like:
 ```js
 freud.listen(['md', 'markdown', 'mkd'], parseFileFunction);
 ```
@@ -41,8 +41,6 @@ The file object available within your listen statements is of structure:
 ```
 
 If the `file.write` property is set to `false` and never reset to `true` at any point in the chain of transformations, Freud will **not** write it to the target directory.
-
-The directory object is similar, only without the data attribute. Again, setting `write` to `false` will prevent it from being written to the target.
 
 *Note:* Freud does **not** watch sub-directories. In order to effectively monitor multiple directories, you will need to construct multiple Freud objects.
 
@@ -71,4 +69,4 @@ Freud will also emit certain events that may be useful, such as:
 
 ### license ###
 
-BSD
+MIT
