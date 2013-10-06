@@ -96,13 +96,13 @@ Freud.prototype.attachListeners = function (extensions, callback) {
   extensions.forEach(doAttach.bind(this))
 
   function doAttach(extension) {
-    extension = extension === '*' ? '*:before' : extension;
-    extension = extension === '/*' ? '/*:before' : extension;
-    extension = this.options.ignoreCase ? extension.toLowerCase() : extension;
+    extension = extension === '*' ? '*:before' : extension
+    extension = extension === '/*' ? '/*:before' : extension
+    extension = this.options.ignoreCase ? extension.toLowerCase() : extension
 
-    this.rules[extension] = this.rules[extension] || [];
-    this.rules[extension].push(callback);
-    this.emit('extensionAdded', extension);
+    this.rules[extension] = this.rules[extension] || []
+    this.rules[extension].push(callback)
+    this.emit('extensionAdded', extension)
   }
 
 }

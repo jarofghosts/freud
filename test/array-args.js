@@ -1,11 +1,11 @@
 var Freud = require('../').Freud,
-  freud = new Freud('freudtest-src', 'freudtest-dst'),
-  assert = require('assert'),
-  fs = require('fs'),
-  compiledFiles = 0,
-  unlinkedFiles = 0;
+    freud = new Freud('freudtest-src', 'freudtest-dst'),
+    assert = require('assert'),
+    fs = require('fs'),
+    compiledFiles = 0,
+    unlinkedFiles = 0;
 
-freud.listen(['md', 'mkd'], function (file) {
+freud.listen(['mkd', 'md'], function (file) {
   file.name = file.name.replace(/\.[^.]+$/, '.markdown');
   return file;
 });
@@ -28,5 +28,5 @@ freud.on('unlinked', function () {
 
 freud.go();
 
-fs.writeFileSync('freudtest-src/test1.md', 'why hello there');
 fs.writeFileSync('freudtest-src/test2.mkd', 'why hello there');
+fs.writeFileSync('freudtest-src/test1.md', 'why hello there');
