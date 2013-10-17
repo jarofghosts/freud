@@ -96,8 +96,8 @@ Freud.prototype.go = function (cb) {
   })
 
   this.listener.on('delete', this.doUnlink.bind(this))
-  this.listener.on('create', this.eventResponseWrap.bind(this))
-  this.listener.on('change', this.eventResponseWrap.bind(this))
+  this.listener.on('create', this.eventResponse.bind(this))
+  this.listener.on('change', this.eventResponse.bind(this))
 
   this.listener.start(listenerStarted.bind(this))
 
@@ -117,12 +117,6 @@ Freud.prototype.copyFile = function (filename) {
   }.bind(this))
 
   fs.createReadStream(path.join(this.source, filename)).pipe(endFileStream)
-}
-
-Freud.prototype.eventResponseWrap = function (filename) {
-  fs.stat(filename, function (err, stats) {
-    this.eventResponse(filename, stats)
-  }.bind(this))
 }
 
 Freud.prototype.eventResponse = function (filename, stats) {

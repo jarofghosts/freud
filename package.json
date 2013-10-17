@@ -30,6 +30,6 @@
     "node": ">=0.8"
   },
   "dependencies": {
-    "watch-fs": "0.0.5"
+    "watch-fs": "0.0.6"
   }
 }
