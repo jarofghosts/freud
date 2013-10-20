@@ -1,9 +1,9 @@
 var fs = require('fs'),
-    events = require('events'),
+    EE = require('events').EventEmitter,
     path = require('path'),
     analysis = require('./lib/analysis.js'),
     Watcher = require('watch-fs').Watcher,
-    util = require('util')
+    inherits = require('util').inherits
 
 exports.Freud = Freud
 exports.createFreud = createFreud
@@ -22,7 +22,7 @@ function Freud(source, target, options) {
   return this
 }
 
-util.inherits(Freud, events.EventEmitter)
+inherits(Freud, EE)
 
 Freud.prototype.doUnlink = function (filename) {
   filename = path.basename(filename)
@@ -47,7 +47,8 @@ Freud.prototype.doUnlink = function (filename) {
 }
 
 Freud.prototype.recompile = function (filename) {
-  var extension = filename.split('.').pop();
+  var extension = filename.split('.').pop()
+
   if (this.rules[extension] || this.rules['*:before'] || this.rules['*:after']) {
     return this.compileFile(filename, recompileFile.bind(this))
   }
@@ -140,7 +141,8 @@ Freud.prototype.processFile = function (file, callback) {
   var rules = [].concat(
       (this.rules['*:before'] || [])
       .concat(
-      (this.rules[this.options.ignoreCase ? file.extension.toLowerCase() : file.extension] || [])
+      (this.rules[this.options.ignoreCase ?
+          file.extension.toLowerCase() : file.extension] || [])
       .concat(
       (this.rules['*:after'] || []))
     ))
