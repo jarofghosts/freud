@@ -12,7 +12,7 @@
     "util",
     "utility"
   ],
-  "version": "0.2.9",
+  "version": "0.3.0",
   "author": "jesse keane <me@jessekeane.me> (http://jessekeane.me)",
   "main": "index.js",
   "repository": {
