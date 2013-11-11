@@ -15,9 +15,7 @@ freud.on('compiled', function (filename) {
   compiledFiles++;
   if (compiledFiles == 2) {
     fs.unlinkSync('freudtest-src/test1.md');
-    setTimeout(function () {
-      fs.unlinkSync('freudtest-src/test2.mkd');
-    }, 200)
+    fs.unlinkSync('freudtest-src/test2.mkd');
   }
 });
 
@@ -31,7 +29,5 @@ freud.on('unlinked', function () {
 freud.go(function (err) {
   assert.ok(!err)
   fs.writeFileSync('freudtest-src/test2.mkd', 'why hello there');
-  setTimeout(function () {
-    fs.writeFileSync('freudtest-src/test1.md', 'why hello there');
-  }, 200)
+  fs.writeFileSync('freudtest-src/test1.md', 'why hello there');
 })
