@@ -17,7 +17,7 @@ function Freud(source, target, options) {
   this.rules = []
   this.options = options || {}
   this.listener = null
-  this.version = require(path.join(__dirname, 'package.json')).version
+  this.version = require('./package.json').version
 
   return this
 }
@@ -26,37 +26,41 @@ inherits(Freud, EE)
 
 Freud.prototype.doUnlink = function (filename) {
   filename = path.basename(filename)
-  var dummyFile = {
-    name: filename,
-    fullPath: path.join(this.source + filename),
-    extension: filename.split('.').pop(),
-    write: true,
-    stats: undefined,
-    data: ''
-  }
-  this.processFile(dummyFile, parseFile.bind(this))
+  var self = this,
+      dummyFile = {
+        name: filename,
+        fullPath: path.join(this.source + filename),
+        extension: filename.split('.').pop(),
+        write: true,
+        stats: undefined,
+        data: ''
+      }
+
+  self.processFile(dummyFile, parseFile)
 
   function parseFile(file) {
-    analysis.unlink(this.target, file.name, checkUnlink.bind(this))
+    analysis.unlink(self.target, file.name, checkUnlink)
 
     function checkUnlink(err, didUnlink) {
-      if (!err && didUnlink) return this.emit('unlinked', file.name)
-      this.emit('error', new Error('file unlink error'))
+      if (!err && didUnlink) return self.emit('unlinked', file.name)
+      self.emit('error', new Error('file unlink error'))
     }
   }
 }
 
 Freud.prototype.recompile = function (filename) {
-  var extension = filename.split('.').pop()
+  var extension = filename.split('.').pop(),
+      self = this
 
-  if (this.rules[extension] || this.rules['*:before'] || this.rules['*:after']) {
-    return this.compileFile(filename, recompileFile.bind(this))
+  if (self.rules[extension] || self.rules['*:before'] || self.rules['*:after']) {
+    return self.compileFile(filename, recompileFile)
   }
-  this.copyFile(filename)
+
+  self.copyFile(filename)
 
   function recompileFile(filename, written) {
-    this.emit('recompiled', filename);
-    if (!written) this.emit('blocked', filename)
+    self.emit('recompiled', filename)
+    if (!written) self.emit('blocked', filename)
   }
 }
 
@@ -66,74 +70,81 @@ Freud.prototype.listen = function (extension, callback) {
 }
 
 Freud.prototype.attachListeners = function (extensions, callback) {
+  var self = this
 
-  extensions.forEach(doAttach.bind(this))
+  extensions.forEach(doAttach)
 
   function doAttach(extension) {
     extension = extension === '*' ? '*:before' : extension
     extension = extension === '/*' ? '/*:before' : extension
-    extension = this.options.ignoreCase ? extension.toLowerCase() : extension
+    extension = self.options.ignoreCase ? extension.toLowerCase() : extension
 
-    this.rules[extension] = this.rules[extension] || []
-    this.rules[extension].push(callback)
-    this.emit('extensionAdded', extension)
+    self.rules[extension] = self.rules[extension] || []
+    self.rules[extension].push(callback)
+    self.emit('extensionAdded', extension)
   }
 }
 
 Freud.prototype.go = function (cb) {
-  var noRecurseRegexp = new RegExp(this.source + '/?$')
-  this.listener = new Watcher({
-    paths: this.source,
+  var noRecurseRegexp = new RegExp(this.source + '/?$'),
+      self = this
+
+  self.listener = new Watcher({
+    paths: self.source,
     filters: {
       includeDir: function (dirName) {
         return noRecurseRegexp.test(dirName)
       },
       includeFile: function (fileName) {
-        if (!this.options.monitorDot && /^\./.test(fileName)) return false
-        if (!this.options.monitorSquiggle && /~$/.test(fileName)) return false
+        if (!self.options.monitorDot && /^\./.test(fileName)) return false
+        if (!self.options.monitorSquiggle && /~$/.test(fileName)) return false
         return true
-      }.bind(this)
+      }
     }
   })
 
-  this.listener.on('delete', this.doUnlink.bind(this))
-  this.listener.on('create', this.eventResponse.bind(this))
-  this.listener.on('change', this.eventResponse.bind(this))
+  self.listener.on('delete', self.doUnlink.bind(self))
+  self.listener.on('create', self.eventResponse.bind(self))
+  self.listener.on('change', self.eventResponse.bind(self))
 
-  this.listener.start(listenerStarted.bind(this))
+  self.listener.start(listenerStarted)
 
   function listenerStarted(err) {
     if (err) return cb && cb(err)
-    this.emit('started', this)
+    self.emit('started', self)
     cb && cb()
   }
 }
 
 Freud.prototype.copyFile = function (filename) {
-  this.emit('copying')
-  var endFileStream = fs.createWriteStream(path.join(this.target, filename))
+  var self = this
+
+  self.emit('copying')
+  var endFileStream = fs.createWriteStream(path.join(self.target, filename))
 
   endFileStream.on('finish', function () {
-    this.emit('copied', filename)
-  }.bind(this))
+    self.emit('copied', filename)
+  })
 
-  fs.createReadStream(path.join(this.source, filename)).pipe(endFileStream)
+  fs.createReadStream(path.join(self.source, filename)).pipe(endFileStream)
 }
 
 Freud.prototype.eventResponse = function (filename, stats) {
   filename = path.basename(filename)
 
-  var extension = filename.split('.').pop()
-  extension = this.options.ignoreCase ? extension.toLowerCase() : extension
-  if (this.rules[extension] || this.rules['*:before'] || this.rules['*:after']) {
-    return this.compileFile(filename, fileCompiled.bind(this))
+  var extension = filename.split('.').pop(),
+      self = this
+
+  extension = self.options.ignoreCase ? extension.toLowerCase() : extension
+  if (self.rules[extension] || self.rules['*:before'] || self.rules['*:after']) {
+    return self.compileFile(filename, fileCompiled)
   }
 
-  this.copyFile(filename)
+  self.copyFile(filename)
 
   function fileCompiled(filename, written) {
-    this.emit('compiled', filename)
-    if (!written) this.emit('blocked', filename)
+    self.emit('compiled', filename)
+    if (!written) self.emit('blocked', filename)
   }
 }
 
@@ -151,17 +162,19 @@ Freud.prototype.processFile = function (file, callback) {
 }
 
 Freud.prototype.compileFile = function (filename, callback) {
+  var self = this
+
   this.emit('compiling', filename)
-  analysis.getFile(this.source, filename, function (file) {
-    this.processFile(file, putFile.bind(this))
-  }.bind(this))
+  analysis.getFile(self.source, filename, function (file) {
+    self.processFile(file, putFile)
+  })
 
   function putFile(file) {
     if (!file.write) return callback(file.name, false)
 
-    analysis.putFile(this.target, file, function () {
+    analysis.putFile(self.target, file, function () {
       callback(file.name, true)
-    }.bind(this))
+    })
   }
 }
 
