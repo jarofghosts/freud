@@ -24,12 +24,16 @@
   },
   "license": "MIT",
   "scripts": {
-    "test": "node test/mutations.js && node test/vanilla-copy.js && node test/case.js && node test/array-args.js && node test/options.js && node test/mutations-advanced.js"
+    "test": "node test/index.js"
   },
   "engines": {
     "node": ">=0.8"
   },
   "dependencies": {
     "watch-fs": "0.0.6"
+  },
+  "devDependencies": {
+    "rimraf": "^2.2.8",
+    "tape": "^2.13.3"
   }
 }

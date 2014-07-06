@@ -1,58 +1,58 @@
-var fs = require('fs'),
-    EE = require('events').EventEmitter,
-    path = require('path'),
-    analysis = require('./lib/analysis.js'),
-    Watcher = require('watch-fs').Watcher,
-    inherits = require('util').inherits
+var EE = require('events').EventEmitter
+  , path = require('path')
+  , fs = require('fs')
 
-exports.Freud = Freud
-exports.createFreud = createFreud
+var analysis = require('./lib/analysis.js')
+  , Watcher = require('watch-fs').Watcher
+
+module.exports = createFreud
 
 function Freud(source, target, options) {
-  if (!(this instanceof Freud)) return new Freud(source, target, options)
+  EE.call(this)
 
   this.source = path.normalize(source)
   this.target = path.normalize(target)
-  this.processed = []
   this.rules = []
   this.options = options || {}
   this.listener = null
-  this.version = require('./package.json').version
 
   return this
 }
 
-inherits(Freud, EE)
+Freud.prototype = Object.create(EE.prototype)
 
 Freud.prototype.doUnlink = function (filename) {
   filename = path.basename(filename)
-  var self = this,
-      dummyFile = {
-        name: filename,
-        fullPath: path.join(this.source + filename),
-        extension: filename.split('.').pop(),
-        write: true,
-        stats: undefined,
-        data: ''
-      }
 
-  self.processFile(dummyFile, parseFile)
+  var self = this
+    , dummyFile
+    , file
 
-  function parseFile(file) {
-    analysis.unlink(self.target, file.name, checkUnlink)
+  dummyFile = {
+      name: filename
+    , fullPath: path.join(this.source, filename)
+    , extension: analysis.extname(filename)
+    , write: true
+    , stats: null
+    , data: ''
+  }
 
-    function checkUnlink(err, didUnlink) {
-      if (!err && didUnlink) return self.emit('unlinked', file.name)
-      self.emit('error', new Error('file unlink error'))
-    }
+  file = self.processFile(dummyFile)
+
+  analysis.unlink(self.target, file.name, checkUnlink)
+
+  function checkUnlink(err, didUnlink) {
+    if(err) return self.emit('error', err)
+
+    if(didUnlink) self.emit('unlinked', file.name)
   }
 }
 
-Freud.prototype.recompile = function (filename) {
-  var extension = filename.split('.').pop(),
-      self = this
+Freud.prototype.recompile = function Freud$recompile(filename) {
+  var extension = analysis.extname(filename)
+    , self = this
 
-  if (self.rules[extension] || self.rules['*:before'] || self.rules['*:after']) {
+  if(self.rules[extension] || self.rules['*:before'] || self.rules['*:after']) {
     return self.compileFile(filename, recompileFile)
   }
 
@@ -60,12 +60,12 @@ Freud.prototype.recompile = function (filename) {
 
   function recompileFile(filename, written) {
     self.emit('recompiled', filename)
-    if (!written) self.emit('blocked', filename)
+    if(!written) self.emit('blocked', filename)
   }
 }
 
-Freud.prototype.listen = function (extension, callback) {
-  if (!Array.isArray(extension)) extension = [extension]
+Freud.prototype.listen = function Freud$listen(extension, callback) {
+  if(!Array.isArray(extension)) extension = [extension]
   this.attachListeners(extension, callback)
 }
 
@@ -76,7 +76,6 @@ Freud.prototype.attachListeners = function (extensions, callback) {
 
   function doAttach(extension) {
     extension = extension === '*' ? '*:before' : extension
-    extension = extension === '/*' ? '/*:before' : extension
     extension = self.options.ignoreCase ? extension.toLowerCase() : extension
 
     self.rules[extension] = self.rules[extension] || []
@@ -85,19 +84,20 @@ Freud.prototype.attachListeners = function (extensions, callback) {
   }
 }
 
-Freud.prototype.go = function (cb) {
-  var noRecurseRegexp = new RegExp(this.source + '/?$'),
-      self = this
+Freud.prototype.go = function Freud$go(cb) {
+  var noRecurseRegexp = new RegExp(this.source + '/?$')
+    , self = this
 
   self.listener = new Watcher({
     paths: self.source,
     filters: {
-      includeDir: function (dirName) {
+      includeDir: function(dirName) {
         return noRecurseRegexp.test(dirName)
       },
-      includeFile: function (fileName) {
-        if (!self.options.monitorDot && /^\./.test(fileName)) return false
-        if (!self.options.monitorSquiggle && /~$/.test(fileName)) return false
+      includeFile: function(fileName) {
+        if(!self.options.monitorDot && /^\./.test(fileName)) return false
+        if(!self.options.monitorSquiggle && /~$/.test(fileName)) return false
+
         return true
       }
     }
@@ -110,7 +110,8 @@ Freud.prototype.go = function (cb) {
   self.listener.start(listenerStarted)
 
   function listenerStarted(err) {
-    if (err) return cb && cb(err)
+    if(err) return cb && cb(err)
+
     self.emit('started', self)
     cb && cb()
   }
@@ -118,25 +119,35 @@ Freud.prototype.go = function (cb) {
 
 Freud.prototype.copyFile = function (filename) {
   var self = this
+    , writeStream
 
   self.emit('copying')
-  var endFileStream = fs.createWriteStream(path.join(self.target, filename))
 
-  endFileStream.on('finish', function () {
+  var writeStream = fs.createWriteStream(path.join(self.target, filename))
+
+  writeStream
+      .on('error', console.error.bind(console))
+      .on('finish', emitCopied)
+
+  fs.createReadStream(path.join(self.source, filename)).pipe(writeStream)
+
+  function emitCopied() {
     self.emit('copied', filename)
-  })
-
-  fs.createReadStream(path.join(self.source, filename)).pipe(endFileStream)
+  }
 }
 
-Freud.prototype.eventResponse = function (filename, stats) {
+Freud.prototype.eventResponse = function Freud$eventResponse(filename, stats) {
   filename = path.basename(filename)
 
-  var extension = filename.split('.').pop(),
-      self = this
+  var extension = analysis.extname(filename)
+    , self = this
+    , rules
+
+  rules = self.rules
 
   extension = self.options.ignoreCase ? extension.toLowerCase() : extension
-  if (self.rules[extension] || self.rules['*:before'] || self.rules['*:after']) {
+
+  if(rules[extension] || rules['*:before'] || rules['*:after']) {
     return self.compileFile(filename, fileCompiled)
   }
 
@@ -144,45 +155,51 @@ Freud.prototype.eventResponse = function (filename, stats) {
 
   function fileCompiled(filename, written) {
     self.emit('compiled', filename)
-    if (!written) self.emit('blocked', filename)
+    if(!written) self.emit('blocked', filename)
   }
 }
 
 Freud.prototype.processFile = function (file, callback) {
-  var rules = [].concat(
-      (this.rules['*:before'] || [])
-      .concat(
-      (this.rules[this.options.ignoreCase ?
-          file.extension.toLowerCase() : file.extension] || [])
-      .concat(
-      (this.rules['*:after'] || []))
-    ))
-  if (!rules.length) return callback(file)
-  analysis.executeRules(rules, file, callback)
+  var rules = []
+    , extension
+
+  extension = file.extension
+  if(this.options.ignoreCase) extension = extension.toLowerCase()
+
+  rules = rules.concat(this.rules['*:before'] || [])
+  rules = rules.concat(this.rules[extension] || [])
+  rules = rules.concat(this.rules['*:after'] || [])
+
+  if(!rules.length) return file
+
+  file = analysis.executeRules(rules, file)
+
+  return file
 }
 
 Freud.prototype.compileFile = function (filename, callback) {
   var self = this
 
-  this.emit('compiling', filename)
-  analysis.getFile(self.source, filename, function (file) {
-    self.processFile(file, putFile)
-  })
+  self.emit('compiling', filename)
 
-  function putFile(file) {
-    if (!file.write) return callback(file.name, false)
+  analysis.getFile(self.source, filename, processFile)
 
-    analysis.putFile(self.target, file, function () {
+  function processFile(file) {
+    file = self.processFile(file)
+
+    if(!file.write) return callback(file.name, false)
+
+    fs.writeFile(path.join(self.target, file.name), file.data, respond)
+
+    function respond(err) {
       callback(file.name, true)
-    })
+    }
   }
 }
 
-Freud.prototype.stop = function (cb) {
+Freud.prototype.stop = function Freud$stop() {
   this.listener && this.listener.stop()
   this.emit('stopped')
-
-  cb && cb()
 }
 
 function createFreud(source, destination, options) {
