@@ -207,16 +207,16 @@ test('copies files even if there are no mutations', function(t) {
   var freud = Freud(src, dst)
 
   freud.on('copied', function(filename) {
-    t.equal(filename, 'testfile.txt')
-    t.ok(fs.existsSync(path.join(dst, 'testfile.txt')))
+    t.equal(filename, 'copytestfile.txt')
+    t.ok(fs.existsSync(path.join(dst, 'copytestfile.txt')))
 
     freud.stop()
     t.end()
   })
 
-  freud.go(function (err) {
+  freud.go(function(err) {
     t.ok(!err)
-    fs.writeFileSync(path.join(src, 'testfile.txt'), 'why hello there')
+    fs.writeFileSync(path.join(src, 'copytestfile.txt'), 'why hello there')
   })
 })
 

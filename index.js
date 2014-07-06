@@ -123,7 +123,7 @@ Freud.prototype.copyFile = function (filename) {
 
   self.emit('copying')
 
-  var writeStream = fs.createWriteStream(path.join(self.target, filename))
+  writeStream = fs.createWriteStream(path.join(self.target, filename))
 
   writeStream
       .on('error', console.error.bind(console))
